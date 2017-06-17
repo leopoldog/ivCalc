@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+  <appender name="console" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d %-5p [{%t}%c:%L] %m%n" />
+    </layout>
+  </appender>
+
+  <appender name="OUTPUT" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%m%n" />
+    </layout>
+  </appender>
+
+  <appender name="roll" class="org.apache.log4j.rolling.RollingFileAppender">
+    <param name="File" value="ivCalc.log" />
+    <param name="Append" value="true" />
+    <param name="encoding" value="UTF-8" />
+    <rollingPolicy class="org.apache.log4j.rolling.FixedWindowRollingPolicy">
+      <param name="fileNamePattern" value="ivCalc.log.%i.gz" />
+      <param name="minIndex" value="1" />
+      <param name="maxIndex" value="9" />
+    </rollingPolicy>
+    <triggeringPolicy class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy">
+      <param name="maxFileSize" value="1000000" />
+    </triggeringPolicy>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%d %-5p [{%t}%c:%L] %m%n" />
+    </layout>
+  </appender>
+
+  <category name="Output" additivity="false">
+    <level value="INFO" />
+    <appender-ref ref="OUTPUT" />
+    <appender-ref ref="roll" />
+  </category>
+
+  <root>
+    <priority value="INFO" />
+    <appender-ref ref="console" />
+    <appender-ref ref="roll" />
+  </root>
+</log4j:configuration>
