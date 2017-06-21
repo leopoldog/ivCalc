@@ -1,6 +1,7 @@
 package net.ghielmetti.pokemon;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,36 +48,19 @@ public class Item {
   public List<Pair<Integer, IVLevel>> getCP(final Limit inLimit, final int inCP, final int inHP, final int inStardust) {
     List<Pair<Integer, IVLevel>> cpList = new ArrayList<>();
     List<Pair<Integer, Double>> candidates = Multiplier.getInstance().getMultipliers(inStardust);
-    for (Pair<Integer, Double> candidate : candidates) {
-      int maxS = (int) Math.ceil(((inHP + 1) / candidate.getRight().doubleValue()) - stamina);
-      int minS = 0;
+    Collection<IVLevel> levels = IVMap.getIVLevels(inLimit);
 
-      if (inHP != 10) {
-        minS = (int) Math.floor((inHP / candidate.getRight().doubleValue()) - stamina);
-      }
-
-      if (minS <= 15) {
-        if (maxS > 15) {
-          maxS = 15;
-        }
-
-        for (int ivS = minS; ivS <= maxS; ivS++) {
-          double s = (stamina + ivS) * candidate.getRight().doubleValue();
+    if (!levels.isEmpty()) {
+      for (Pair<Integer, Double> candidate : candidates) {
+        for (IVLevel level : levels) {
+          double s = (stamina + level.getStamina()) * candidate.getRight().doubleValue();
           if ((int) Math.floor(s) == inHP) {
-            for (int ivA = 0; ivA <= 15; ivA++) {
-              if (inLimit.canBe(ivA, ivS)) {
-                double a = (attack + ivA) * candidate.getRight().doubleValue();
-                for (int ivD = 0; ivD <= 15; ivD++) {
-                  if (inLimit.matches(ivA, ivD, ivS)) {
-                    double d = (defense + ivD) * candidate.getRight().doubleValue();
-                    int cp = (int) Math.floor(Math.max(10.0, (Math.sqrt(s * d) * a) / 10.0));
+            double a = (attack + level.getAttack()) * candidate.getRight().doubleValue();
+            double d = (defense + level.getDefense()) * candidate.getRight().doubleValue();
+            int cp = (int) Math.floor(Math.max(10.0, (Math.sqrt(s * d) * a) / 10.0));
 
-                    if (cp == inCP) {
-                      cpList.add(new Pair<>(candidate.getLeft(), new IVLevel(ivA, ivD, ivS)));
-                    }
-                  }
-                }
-              }
+            if (cp == inCP) {
+              cpList.add(new Pair<>(candidate.getLeft(), level));
             }
           }
         }

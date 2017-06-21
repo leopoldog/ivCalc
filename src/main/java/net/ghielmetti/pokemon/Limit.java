@@ -2,14 +2,14 @@ package net.ghielmetti.pokemon;
 
 public class Limit {
   private char    level;
-  private int     min;
-  private int     max;
   private char    strength;
-  private int     minStrength;
-  private int     maxStrength;
   private boolean a;
   private boolean h;
   private boolean d;
+  private int     min;
+  private int     max;
+  private int     minStrength;
+  private int     maxStrength;
 
   public Limit(final String inDescription) {
     String description = inDescription.toLowerCase();
@@ -74,6 +74,30 @@ public class Limit {
   public boolean canBe(final int inIVA, final int inIVS) {
     int sum = inIVA + inIVS;
     return ((sum + 15) >= min) && (sum <= max);
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if ((obj == null) || (getClass() != obj.getClass())) {
+      return false;
+    }
+    Limit other = (Limit) obj;
+    return (a == other.a) && (d == other.d) && (h == other.h) && (level == other.level) && (strength == other.strength);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = (prime * result) + (a ? 1231 : 1237);
+    result = (prime * result) + (d ? 1231 : 1237);
+    result = (prime * result) + (h ? 1231 : 1237);
+    result = (prime * result) + level;
+    result = (prime * result) + strength;
+    return result;
   }
 
   public boolean matches(final int inIVAttack, final int inIVDefense, final int inIVStamina) {

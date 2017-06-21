@@ -25,10 +25,6 @@ public class Pokedex {
     readEvolutions();
   }
 
-  public static Collection<String> getAllNames() {
-    return pokemons.keySet();
-  }
-
   public static Pokedex getInstance() {
     if (instance == null) {
       instance = new Pokedex();
@@ -36,11 +32,15 @@ public class Pokedex {
     return instance;
   }
 
-  public static Item getItem(final String inName) {
+  public Collection<String> getAllNames() {
+    return pokemons.keySet();
+  }
+
+  public Item getItem(final String inName) {
     return pokemons.get(inName);
   }
 
-  public static List<String> getNamesFromPartialName(final String inPartialName) {
+  public List<String> getNamesFromPartialName(final String inPartialName) {
     String partialName = inPartialName.toLowerCase();
     return pokemons.keySet().stream() //
         .filter(name -> name.indexOf(partialName) != -1)//

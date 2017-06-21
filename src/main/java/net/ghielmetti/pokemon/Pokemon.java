@@ -38,8 +38,8 @@ public class Pokemon implements Runnable {
       Integer stardust = Integer.valueOf(inArguments[3]);
       Limit limit = new Limit(inArguments[4]);
 
-      for (String name : Pokedex.getNamesFromPartialName(approximatedName)) {
-        Item item = Pokedex.getItem(name);
+      for (String name : Pokedex.getInstance().getNamesFromPartialName(approximatedName)) {
+        Item item = Pokedex.getInstance().getItem(name);
         List<Pair<Integer, IVLevel>> candidates = item.getCP(limit, cp.intValue(), hp.intValue(), stardust.intValue());
         if (!candidates.isEmpty()) {
           System.out.println();
