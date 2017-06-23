@@ -27,7 +27,7 @@
   </appender>
 
   <root>
-    <priority value="warn" />
+    <priority value="INFO" />
     <appender-ref ref="console" />
     <appender-ref ref="roll" />
   </root>

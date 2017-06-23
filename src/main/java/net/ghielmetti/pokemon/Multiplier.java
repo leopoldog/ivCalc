@@ -16,9 +16,10 @@ import com.opencsv.CSVReader;
 import net.ghielmetti.utilities.Pair;
 
 public class Multiplier {
-  private final static Logger                       LOGGER = LoggerFactory.getLogger(Multiplier.class);
+  private final static Logger                       LOGGER        = LoggerFactory.getLogger(Multiplier.class);
   private static Multiplier                         instance;
-  private Map<Integer, List<Pair<Integer, Double>>> values = new HashMap<>();
+  private Map<Integer, List<Pair<Integer, Double>>> valuesBySD    = new HashMap<>();
+  private Map<Integer, Double>                      valuesByLevel = new HashMap<>();
 
   private Multiplier() {
     try (InputStream is = getClass().getResourceAsStream("/multipliers.csv"); //
@@ -27,12 +28,15 @@ public class Multiplier {
       String[] line;
       while ((line = reader.readNext()) != null) {
         Integer stardust = Integer.valueOf(line[2]);
-        List<Pair<Integer, Double>> list = values.get(stardust);
+        List<Pair<Integer, Double>> list = valuesBySD.get(stardust);
         if (list == null) {
           list = new ArrayList<>();
-          values.put(stardust, list);
+          valuesBySD.put(stardust, list);
         }
-        list.add(new Pair<>(Integer.valueOf((int) (Float.parseFloat(line[0]) * 2.0)), Double.valueOf(line[1])));
+        Integer level = Integer.valueOf((int) (Float.parseFloat(line[0]) * 2.0));
+        Double multiplier = Double.valueOf(line[1]);
+        valuesByLevel.put(level, multiplier);
+        list.add(new Pair<>(level, multiplier));
       }
     } catch (Exception e) {
       LOGGER.error("Unable to instantiate the Multiplier", e);
@@ -46,7 +50,18 @@ public class Multiplier {
     return instance;
   }
 
+  public Double getMultiplier(final int inLevel) {
+    return valuesByLevel.get(Integer.valueOf(inLevel));
+  }
+
   public List<Pair<Integer, Double>> getMultipliers(final int inStardust) {
-    return Collections.unmodifiableList(values.get(Integer.valueOf(inStardust)));
+    List<Pair<Integer, Double>> list = valuesBySD.get(Integer.valueOf(inStardust));
+    return Collections.unmodifiableList(list == null ? new ArrayList<>() : list);
+  }
+
+  public List<Integer> getStardustList() {
+    List<Integer> sdList = new ArrayList<>(valuesBySD.keySet());
+    Collections.sort(sdList);
+    return sdList;
   }
 }

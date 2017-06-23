@@ -2,35 +2,13 @@ package net.ghielmetti.pokemon;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.ghielmetti.utilities.Pair;
 
-public class Pokemon implements Runnable {
-  private final static Logger LOGGER = LoggerFactory.getLogger(Pokemon.class);
-  private static Pokemon      instance;
-
-  public Pokemon() {
-    LOGGER.debug("Pokémons: {}", Pokedex.getInstance().toString());
-  }
-
-  public static Pokemon getInstance() {
-    if (instance == null) {
-      try {
-        instance = new Pokemon();
-      } catch (Exception e) {
-        LOGGER.error("Unable to start Pokemon", e);
-      }
-    }
-    return instance;
-  }
-
+public class Pokemon {
   public static void main(final String[] inArguments) {
     if (inArguments.length == 0) {
-      if (Pokemon.getInstance() != null) {
-        new Thread(Pokemon.getInstance(), "Pokémon main").start();
-      }
+      PokemonController controller = new PokemonController();
+      new Thread(controller, "Pokémon").start();
     } else {
       String approximatedName = inArguments[0];
       Integer cp = Integer.valueOf(inArguments[1]);
@@ -40,7 +18,7 @@ public class Pokemon implements Runnable {
 
       for (String name : Pokedex.getInstance().getNamesFromPartialName(approximatedName)) {
         Item item = Pokedex.getInstance().getItem(name);
-        List<Pair<Integer, IVLevel>> candidates = item.getCP(limit, cp.intValue(), hp.intValue(), stardust.intValue());
+        List<Pair<Integer, IVLevel>> candidates = item.getIV(limit, cp.intValue(), hp.intValue(), stardust.intValue());
         if (!candidates.isEmpty()) {
           System.out.println();
           System.out.println(item);
@@ -52,10 +30,5 @@ public class Pokemon implements Runnable {
         }
       }
     }
-  }
-
-  @Override
-  public void run() {
-    LOGGER.debug("Start");
   }
 }
