@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Archiver-Version: Plexus Archiver
-Created-By: Apache Maven
-Built-By: lghi
-Build-Jdk: 1.6.0_26
-Main-Class: net.ghielmetti.pokemon.Pokemon
-Class-Path: 

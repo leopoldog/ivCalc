@@ -6,15 +6,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.Icon;
+
 import net.ghielmetti.utilities.Pair;
 
 public class Item {
+  private Icon   icon;
   private String name;
   private int    attack;
   private int    defense;
   private int    stamina;
 
-  public Item(final String inName, final int inAttack, final int inDefense, final int inStamina) {
+  public Item(final Icon inIcon, final String inName, final int inAttack, final int inDefense, final int inStamina) {
+    icon = inIcon;
     name = inName;
     attack = inAttack;
     defense = inDefense;
@@ -45,7 +49,11 @@ public class Item {
     return cpList;
   }
 
-  public List<Pair<Integer, IVLevel>> getCP(final Limit inLimit, final int inCP, final int inHP, final int inStardust) {
+  public Icon getIcon() {
+    return icon;
+  }
+
+  public List<Pair<Integer, IVLevel>> getIV(final Limit inLimit, final int inCP, final int inHP, final int inStardust) {
     List<Pair<Integer, IVLevel>> cpList = new ArrayList<>();
     List<Pair<Integer, Double>> candidates = Multiplier.getInstance().getMultipliers(inStardust);
     Collection<IVLevel> levels = IVMap.getIVLevels(inLimit);
@@ -67,6 +75,17 @@ public class Item {
       }
     }
     return cpList;
+  }
+
+  public Pair<Integer, Integer> getMinMaxCP(final int inLevel) {
+    double multiplier = Multiplier.getInstance().getMultiplier(inLevel).doubleValue();
+    double aMax = (attack + 15) * multiplier;
+    double dMax = (defense + 15) * multiplier;
+    double sMax = (stamina + 15) * multiplier;
+    double aMin = attack * multiplier;
+    double dMin = defense * multiplier;
+    double sMin = stamina * multiplier;
+    return new Pair<>(Integer.valueOf(Math.max(10, (int) ((Math.sqrt(sMin * dMin) * aMin) / 10.0))), Integer.valueOf(Math.max(10, (int) ((Math.sqrt(sMax * dMax) * aMax) / 10.0))));
   }
 
   public String getName() {

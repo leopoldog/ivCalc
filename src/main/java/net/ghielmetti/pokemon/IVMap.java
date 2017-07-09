@@ -1,7 +1,6 @@
 package net.ghielmetti.pokemon;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,8 @@ public class IVMap {
     for (char l = '1'; l <= '4'; l++) {
       for (char s = 'a'; s <= 'd'; s++) {
         for (char p = 1; p <= 7; p++) {
-          map.put(new Limit(Character.toString(l) + s + "-" + ((p & 4) == 0 ? "h" : "") + ((p & 2) == 0 ? "a" : "") + ((p & 1) == 0 ? "d" : "")), new ArrayList<>());
+          String limit = Character.toString(l) + s + "-" + ((p & 4) == 0 ? "" : "h") + ((p & 2) == 0 ? "" : "a") + ((p & 1) == 0 ? "" : "d");
+          map.put(new Limit(limit), new ArrayList<>());
         }
       }
     }
@@ -33,6 +33,11 @@ public class IVMap {
         }
       }
     }
+    for (Entry<Limit, List<IVLevel>> e : new ArrayList<>(map.entrySet())) {
+      if (e.getValue().isEmpty()) {
+        map.remove(e.getKey());
+      }
+    }
   }
 
   private IVMap() {
@@ -43,7 +48,9 @@ public class IVMap {
     return Collections.unmodifiableList(map.get(inLimit));
   }
 
-  public static Collection<Limit> getLimits() {
-    return map.keySet();
+  public static List<Limit> getLimits() {
+    List<Limit> limits = new ArrayList<>(map.keySet());
+    Collections.sort(limits);
+    return limits;
   }
 }

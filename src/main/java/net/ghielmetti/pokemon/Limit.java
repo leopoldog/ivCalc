@@ -1,8 +1,8 @@
 package net.ghielmetti.pokemon;
 
-public class Limit {
-  private char    level;
-  private char    strength;
+public class Limit implements Comparable<Limit> {
+  private int     level;
+  private int     strength;
   private boolean a;
   private boolean h;
   private boolean d;
@@ -11,69 +11,56 @@ public class Limit {
   private int     minStrength;
   private int     maxStrength;
 
+  public Limit(final int inLevel, final int inStrength, final boolean inHP, final boolean inAttack, final boolean inDefense) {
+    initialize(inLevel, inStrength, inHP, inAttack, inDefense);
+  }
+
   public Limit(final String inDescription) {
     String description = inDescription.toLowerCase();
-    level = description.charAt(0);
-
-    switch (level) {
-      case '0':
-      case '4':
-        max = 45;
-        min = 37;
-        break;
-      case '3':
-        max = 36;
-        min = 30;
-        break;
-      case '2':
-        max = 29;
-        min = 23;
-        break;
-      case '1':
-        level = '1';
-        max = 22;
-        min = 0;
-        break;
-      default:
-        max = 45;
-        min = 0;
-        break;
-    }
-
-    strength = description.charAt(1);
-    switch (strength) {
-      case 'a':
-        maxStrength = 15;
-        minStrength = 15;
-        break;
-      case 'b':
-        maxStrength = 14;
-        minStrength = 13;
-        break;
-      case 'c':
-        maxStrength = 12;
-        minStrength = 8;
-        break;
-      case 'd':
-        maxStrength = 7;
-        minStrength = 0;
-        break;
-      default:
-        strength = 'x';
-        maxStrength = 15;
-        minStrength = 0;
-        break;
-    }
-
+    level = description.charAt(0) - '0';
+    strength = 'e' - description.charAt(1);
     String detail = description.substring(2);
-    a = detail.indexOf('a') != -1;
-    h = detail.indexOf('h') != -1;
-    d = detail.indexOf('d') != -1;
+    initialize(level, strength, detail.indexOf('h') != -1, detail.indexOf('a') != -1, detail.indexOf('d') != -1);
   }
 
   public boolean canBe(final int inIVA, final int inIVS) {
     int sum = inIVA + inIVS;
     return ((sum + 15) >= min) && (sum <= max);
+  }
+
+  @Override
+  public int compareTo(final Limit inOther) {
+    if (level < inOther.level) {
+      return 1;
+    }
+    if (level > inOther.level) {
+      return -1;
+    }
+    if (strength < inOther.strength) {
+      return 1;
+    }
+    if (strength > inOther.strength) {
+      return -1;
+    }
+    if (!h && inOther.h) {
+      return 1;
+    }
+    if (h && !inOther.h) {
+      return -1;
+    }
+    if (!a && inOther.a) {
+      return 1;
+    }
+    if (a && !inOther.a) {
+      return -1;
+    }
+    if (!d && inOther.d) {
+      return 1;
+    }
+    if (d && !inOther.d) {
+      return -1;
+    }
+    return 0;
   }
 
   @Override
@@ -88,6 +75,14 @@ public class Limit {
     return (a == other.a) && (d == other.d) && (h == other.h) && (level == other.level) && (strength == other.strength);
   }
 
+  public int getLevel() {
+    return level;
+  }
+
+  public int getStrength() {
+    return strength;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -98,6 +93,18 @@ public class Limit {
     result = (prime * result) + level;
     result = (prime * result) + strength;
     return result;
+  }
+
+  public boolean isAttack() {
+    return a;
+  }
+
+  public boolean isDefense() {
+    return d;
+  }
+
+  public boolean isHP() {
+    return h;
   }
 
   public boolean matches(final int inIVAttack, final int inIVDefense, final int inIVStamina) {
@@ -114,6 +121,64 @@ public class Limit {
 
   @Override
   public String toString() {
-    return Character.toString(level) + strength + "-" + (h ? "h" : "") + (a ? "a" : "") + (d ? "d" : "");
+    return Character.toString("x1234".charAt(level)) + "xdcba".charAt(strength) + "-" + (h ? "h" : "") + (a ? "a" : "") + (d ? "d" : "");
+  }
+
+  private void initialize(final int inLevel, final int inStrength, final boolean inHP, final boolean inAttack, final boolean inDefense) {
+    level = inLevel;
+    strength = inStrength;
+    h = inHP;
+    a = inAttack;
+    d = inDefense;
+
+    switch (inLevel) {
+      case 4:
+        max = 45;
+        min = 37;
+        break;
+      case 3:
+        max = 36;
+        min = 30;
+        break;
+      case 2:
+        max = 29;
+        min = 23;
+        break;
+      case 1:
+      case 0:
+        level = 1;
+        max = 22;
+        min = 0;
+        break;
+      default:
+        level = 0;
+        max = 45;
+        min = 0;
+        break;
+    }
+
+    switch (inStrength) {
+      case 4:
+        maxStrength = 15;
+        minStrength = 15;
+        break;
+      case 3:
+        maxStrength = 14;
+        minStrength = 13;
+        break;
+      case 2:
+        maxStrength = 12;
+        minStrength = 8;
+        break;
+      case 1:
+        maxStrength = 7;
+        minStrength = 0;
+        break;
+      default:
+        strength = 0;
+        maxStrength = 15;
+        minStrength = 0;
+        break;
+    }
   }
 }

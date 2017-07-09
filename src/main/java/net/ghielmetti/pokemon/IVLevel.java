@@ -66,6 +66,10 @@ public class IVLevel implements Comparable<IVLevel> {
     return stamina;
   }
 
+  public int getTotal() {
+    return attack + defense + stamina;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;

@@ -32,7 +32,7 @@ public class ItemTest {
 
   @Before
   public void setUp() {
-    item = new Item("Charmander", 116, 96, 78);
+    item = new Item(null, "Charmander", 116, 96, 78);
   }
 
   @Test
