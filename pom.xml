@@ -47,6 +47,8 @@
             <manifest>
               <addClasspath>false</addClasspath>
               <useUniqueVersions>false</useUniqueVersions>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>
           </archive>
         </configuration>

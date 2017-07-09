@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.AbstractButton;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -20,6 +21,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -59,12 +61,13 @@ public class PokemonView extends JFrame {
   private JScrollPane            scrollList;
   private JScrollPane            scrollAppender;
   private JPanel                 candidatesList;
-
   private JMenuBar               menuBar;
+  private String                 version;
 
   public PokemonView(final ComputePokemonListener inComputePokemonListener, final Team inTeam) {
     computePokemonListener = inComputePokemonListener;
     team = inTeam;
+    version = new VersionReader().getVersion();
     initialize();
   }
 
@@ -150,14 +153,26 @@ public class PokemonView extends JFrame {
   }
 
   private void defineMenu() {
-    menuBar = new JMenuBar();
-    JMenu fileMenu = new JMenu("File");
-    fileMenu.setMnemonic(KeyEvent.VK_F);
     JMenuItem exit = new JMenuItem("Exit");
     exit.setMnemonic(KeyEvent.VK_X);
     exit.addActionListener(e -> dispose());
+
+    JMenuItem about = new JMenuItem("About");
+    about.setMnemonic(KeyEvent.VK_A);
+    about.addActionListener(e -> showAbout());
+
+    JMenu fileMenu = new JMenu("File");
+    fileMenu.setMnemonic(KeyEvent.VK_F);
     fileMenu.add(exit);
+
+    JMenu helpMenu = new JMenu("Help");
+    helpMenu.setMnemonic(KeyEvent.VK_H);
+    helpMenu.add(about);
+
+    menuBar = new JMenuBar();
     menuBar.add(fileMenu);
+    menuBar.add(Box.createHorizontalGlue());
+    menuBar.add(helpMenu);
   }
 
   private void definePanelCode() {
@@ -188,7 +203,7 @@ public class PokemonView extends JFrame {
 
   private void initialize() {
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-    setTitle("Pokémon GO IV calculator, team: " + team.getTeamName());
+    setTitle("Pokémon GO IV calculator version " + version + ", team: " + team.getTeamName());
 
     defineMenu();
     defineFields();
@@ -240,6 +255,10 @@ public class PokemonView extends JFrame {
     if ((button != null) && !button.isSelected()) {
       button.setSelected(true);
     }
+  }
+
+  private void showAbout() {
+    JOptionPane.showMessageDialog(this, "Pokémon GO IV calculator\nVersion: " + version + "\nCopyright 2017 by Leopoldo Ghielmetti\nDistributed under GPLv3!", "Pokémon GO IV calculator", JOptionPane.PLAIN_MESSAGE);
   }
 
   void codeSelected(final ActionEvent inEvent) {
