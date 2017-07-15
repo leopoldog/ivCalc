@@ -1,7 +1,10 @@
 package net.ghielmetti.pokemon;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.prefs.Preferences;
+
+import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +45,26 @@ public class PokemonController implements Runnable {
     Limit limit = view.getCode();
     view.clear();
 
-    for (String name : inNames) {
-      Item item = Pokedex.getInstance().getItem(name);
-      List<Pair<Integer, IVLevel>> candidates = item.getIV(limit, cp.intValue(), hp.intValue(), stardust.intValue());
+    new Thread(() -> {
+      int total = 0;
 
-      if (!candidates.isEmpty()) {
-        view.outputCandidate(item, cp, candidates);
+      for (String name : inNames) {
+        Item item = Pokedex.getInstance().getItem(name);
+        List<Pair<Integer, IVLevel>> candidates = item.getIV(limit, cp.intValue(), hp.intValue(), stardust.intValue());
+
+        if (!candidates.isEmpty()) {
+          sortCandidates(candidates);
+          total += candidates.size();
+          view.outputCandidate(item, cp, candidates);
+          view.setFound(total);
+          if (total > 5000) {
+            view.outputCandidate(null, null, null);
+            JOptionPane.showMessageDialog(view, "More than 5000 Pokémons found, displaying only the first " + total, "Too many Pokémons", JOptionPane.OK_OPTION);
+            break;
+          }
+        }
       }
-    }
+    }, "Search Pokémons").start();
   }
 
   private Team getTeam() {
@@ -69,5 +84,15 @@ public class PokemonController implements Runnable {
       prefs.put("team.name", team.name());
     }
     return team;
+  }
+
+  private void sortCandidates(final List<Pair<Integer, IVLevel>> inCandidates) {
+    Collections.sort(inCandidates, (p1, p2) -> {
+      int c = p1.getLeft().compareTo(p2.getLeft());
+      if (c == 0) {
+        c = p1.getRight().compareTo(p2.getRight());
+      }
+      return c;
+    });
   }
 }

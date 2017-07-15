@@ -25,6 +25,10 @@ public class Item {
     stamina = inStamina;
   }
 
+  private static int computeCP(final double inAttack, final double inDefense, final double inStamina) {
+    return Math.max((int) Math.floor((Math.sqrt(inStamina * inDefense) * inAttack) / 10.0), 10);
+  }
+
   public int getBaseAttack() {
     return attack;
   }
@@ -44,7 +48,7 @@ public class Item {
       double a = (attack + inIVAttack) * candidate.getRight().doubleValue();
       double d = (defense + inIVDefense) * candidate.getRight().doubleValue();
       double s = (stamina + inIVStamina) * candidate.getRight().doubleValue();
-      cpList.put(candidate.getLeft(), Integer.valueOf(Math.max(10, (int) ((Math.sqrt(s * d) * a) / 10.0))));
+      cpList.put(candidate.getLeft(), Integer.valueOf(computeCP(a, d, s)));
     }
     return cpList;
   }
@@ -62,10 +66,10 @@ public class Item {
       for (Pair<Integer, Double> candidate : candidates) {
         for (IVLevel level : levels) {
           double s = (stamina + level.getStamina()) * candidate.getRight().doubleValue();
-          if ((int) Math.floor(s) == inHP) {
+          if (Math.max((int) Math.floor(s), 10) == inHP) {
             double a = (attack + level.getAttack()) * candidate.getRight().doubleValue();
             double d = (defense + level.getDefense()) * candidate.getRight().doubleValue();
-            int cp = (int) Math.floor(Math.max(10.0, (Math.sqrt(s * d) * a) / 10.0));
+            int cp = computeCP(a, d, s);
 
             if (cp == inCP) {
               cpList.add(new Pair<>(candidate.getLeft(), level));
@@ -85,7 +89,7 @@ public class Item {
     double aMin = attack * multiplier;
     double dMin = defense * multiplier;
     double sMin = stamina * multiplier;
-    return new Pair<>(Integer.valueOf(Math.max(10, (int) ((Math.sqrt(sMin * dMin) * aMin) / 10.0))), Integer.valueOf(Math.max(10, (int) ((Math.sqrt(sMax * dMax) * aMax) / 10.0))));
+    return new Pair<>(Integer.valueOf(computeCP(aMin, dMin, sMin)), Integer.valueOf(computeCP(aMax, dMax, sMax)));
   }
 
   public String getName() {

@@ -6,6 +6,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Enumeration;
@@ -13,10 +15,12 @@ import java.util.List;
 
 import javax.swing.AbstractButton;
 import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -27,6 +31,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.BevelBorder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +45,8 @@ public class PokemonView extends JFrame {
     void compute(List<String> inNames);
   }
 
-  private final static Logger    VIEW = LoggerFactory.getLogger("Result");
+  private final static Logger    VIEW              = LoggerFactory.getLogger("Result");
+  public static final ImageIcon  LOGO              = new ImageIcon(ClassLoader.getSystemResource("icons/logo.png"));
   private ComputePokemonListener computePokemonListener;
   private JTextField             pokemonName;
   private JNumberField           cp;
@@ -63,8 +69,46 @@ public class PokemonView extends JFrame {
   private JPanel                 candidatesList;
   private JMenuBar               menuBar;
   private String                 version;
+  private boolean                inSelection;
+  private JPanel                 statusPanel;
+
+  private final FocusListener    sdFocusListener   = new FocusListener() {
+                                                     @Override
+                                                     public void focusGained(final FocusEvent inEvent) {
+                                                       // nothing to do
+                                                     }
+
+                                                     @Override
+                                                     public void focusLost(final FocusEvent inEvent) {
+                                                       try {
+                                                         sd.setSelectedItem(Integer.parseInt(sd.getSelectedItem().toString()));
+                                                         if (sd.getSelectedIndex() == -1) {
+                                                           sd.grabFocus();
+                                                         }
+                                                       } catch (Exception e) {
+                                                         sd.grabFocus();
+                                                       }
+                                                     }
+                                                   };
+
+  private final FocusListener    codeFocusListener = new FocusListener() {
+                                                     @Override
+                                                     public void focusGained(final FocusEvent e) {
+                                                       // nothing to do
+                                                     }
+
+                                                     @Override
+                                                     public void focusLost(final FocusEvent e) {
+                                                       Limit limit = new Limit(code.getSelectedItem().toString());
+                                                       code.setSelectedItem(limit);
+                                                       if (!limit.isValid()) {
+                                                         code.grabFocus();
+                                                       }
+                                                     }
+                                                   };
 
   public PokemonView(final ComputePokemonListener inComputePokemonListener, final Team inTeam) {
+    super();
     computePokemonListener = inComputePokemonListener;
     team = inTeam;
     version = new VersionReader().getVersion();
@@ -74,6 +118,8 @@ public class PokemonView extends JFrame {
   public void clear() {
     candidatesList.removeAll();
     candidatesList.add(new JPanel(), new GridBagConstraints(0, 10000, 1, 1, 1.0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    scrollAppender.getVerticalScrollBar().setValue(0);
+    scrollAppender.getHorizontalScrollBar().setValue(0);
     scrollAppender.updateUI();
   }
 
@@ -98,12 +144,28 @@ public class PokemonView extends JFrame {
   }
 
   public Integer getSD() {
-    return (Integer) sd.getSelectedItem();
+    try {
+      return Integer.valueOf(sd.getSelectedItem().toString());
+    } catch (Exception e) {
+      sd.grabFocus();
+      throw e;
+    }
   }
 
   public void outputCandidate(final Item inItem, final Integer inCP, final List<Pair<Integer, IVLevel>> inCandidates) {
-    candidatesList.add(new CandidatePanel(inItem, inCP, inCandidates), new GridBagConstraints(0, candidatesList.getComponentCount() - 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    if (inItem == null) {
+      candidatesList.add(new JLabel("and more..."), new GridBagConstraints(0, candidatesList.getComponentCount() - 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    } else {
+      candidatesList.add(new CandidatePanel(inItem, inCP, inCandidates), new GridBagConstraints(0, candidatesList.getComponentCount() - 1, 1, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    }
+
     scrollAppender.updateUI();
+  }
+
+  public void setFound(final int inFound) {
+    statusPanel.removeAll();
+    statusPanel.add(new JLabel("Total: " + inFound), BorderLayout.EAST);
+    statusPanel.updateUI();
   }
 
   private void defineAppraisePanel() {
@@ -137,8 +199,12 @@ public class PokemonView extends JFrame {
     cp = new JNumberField(5);
     hp = new JNumberField(5);
     sd = new JComboBox<>(Multiplier.getInstance().getStardustList().toArray(new Integer[0]));
+    sd.setEditable(true);
+    sd.getEditor().getEditorComponent().addFocusListener(sdFocusListener);
     code = new JComboBox<>(IVMap.getLimits().toArray(new Limit[0]));
     code.addActionListener(this::codeSelected);
+    code.setEditable(true);
+    code.getEditor().getEditorComponent().addFocusListener(codeFocusListener);
     candidatesList = new JPanel(new GridBagLayout());
     scrollAppender = new JScrollPane(candidatesList);
     scrollList = new JScrollPane(selected);
@@ -193,6 +259,12 @@ public class PokemonView extends JFrame {
     statsPanel.addActionListener(e -> selectAppreciation());
   }
 
+  private void defineStatusBar() {
+    statusPanel = new JPanel(new BorderLayout());
+    statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+    statusPanel.setPreferredSize(new Dimension(16, 16));
+  }
+
   private void defineTotalPanel() {
     totalPanel = new JComboBox<>();
     for (int i = 1; i <= 4; i++) {
@@ -204,8 +276,10 @@ public class PokemonView extends JFrame {
   private void initialize() {
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setTitle("Pokémon GO IV calculator version " + version + ", team: " + team.getTeamName());
+    setIconImage(LOGO.getImage());
 
     defineMenu();
+    defineStatusBar();
     defineFields();
     definePanelSD();
     definePanelCode();
@@ -221,9 +295,13 @@ public class PokemonView extends JFrame {
     getContentPane().add(panelSD, new GridBagConstraints(3, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     getContentPane().add(panelCode, new GridBagConstraints(4, 0, 1, 1, 1.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     getContentPane().add(compute, new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    getContentPane().add(scrollList, new GridBagConstraints(0, 1, 1, 3, 0.0, 1.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    getContentPane().add(scrollList, new GridBagConstraints(0, 1, 1, 2, 0.0, 1.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     getContentPane().add(appraisePanel, new GridBagConstraints(1, 1, 4, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     getContentPane().add(scrollAppender, new GridBagConstraints(1, 2, 5, 1, 1.0, 1.0, GridBagConstraints.EAST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    getContentPane().add(statusPanel, new GridBagConstraints(0, 3, 6, 1, 1.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+
+    scrollAppender.getVerticalScrollBar().setUnitIncrement(20);
+    scrollAppender.getHorizontalScrollBar().setUnitIncrement(20);
 
     getRootPane().setDefaultButton(compute);
     setJMenuBar(menuBar);
@@ -236,15 +314,18 @@ public class PokemonView extends JFrame {
   private void resetSizes() {
     pack();
     pokemonName.setPreferredSize(new Dimension(130, (int) compute.getSize().getHeight()));
+    pokemonName.setMinimumSize(pokemonName.getPreferredSize());
     totalPanel.setPreferredSize(new Dimension(200, (int) totalPanel.getSize().getHeight()));
     statsPanel.setPreferredSize(new Dimension(200, (int) statsPanel.getSize().getHeight()));
     pack();
   }
 
-  private void selectAppreciation() {
-    Limit limit = new Limit(totalPanel.getSelectedIndex() + 1, statsPanel.getSelectedIndex() + 1, bestQualityHP.isSelected(), bestQualityAttack.isSelected(), bestQualityDefense.isSelected());
-    code.setSelectedItem(limit);
-    codeSelected(null);
+  private synchronized void selectAppreciation() {
+    if (!inSelection) {
+      Limit limit = new Limit(totalPanel.getSelectedIndex() + 1, statsPanel.getSelectedIndex() + 1, bestQualityHP.isSelected(), bestQualityAttack.isSelected(), bestQualityDefense.isSelected());
+      code.setSelectedItem(limit);
+      codeSelected(null);
+    }
   }
 
   private void selectButton(final int inButtonNumber, final Enumeration<AbstractButton> inEnumeration) {
@@ -258,11 +339,20 @@ public class PokemonView extends JFrame {
   }
 
   private void showAbout() {
-    JOptionPane.showMessageDialog(this, "Pokémon GO IV calculator\nVersion: " + version + "\nCopyright 2017 by Leopoldo Ghielmetti\nDistributed under GPLv3!", "Pokémon GO IV calculator", JOptionPane.PLAIN_MESSAGE);
+    JOptionPane.showMessageDialog(this, "Pokémon GO IV calculator\nVersion: " + version + "\nCopyright 2017 by Leopoldo Ghielmetti\nDistributed under GPLv3!", "Pokémon GO IV calculator", JOptionPane.PLAIN_MESSAGE, LOGO);
   }
 
-  void codeSelected(final ActionEvent inEvent) {
-    Limit limit = (Limit) code.getSelectedItem();
+  synchronized void codeSelected(final ActionEvent inEvent) {
+    inSelection = true;
+    Object selected = code.getSelectedItem();
+    Limit limit;
+
+    if (selected instanceof Limit) {
+      limit = (Limit) selected;
+    } else {
+      limit = new Limit(selected.toString());
+    }
+
     if (bestQualityHP.isSelected() != limit.isHP()) {
       bestQualityHP.setSelected(limit.isHP());
     }
@@ -274,6 +364,7 @@ public class PokemonView extends JFrame {
     }
     totalPanel.setSelectedIndex(limit.getLevel() - 1);
     statsPanel.setSelectedIndex(limit.getStrength() - 1);
+    inSelection = false;
   }
 
   void select() {

@@ -16,10 +16,10 @@ public class Limit implements Comparable<Limit> {
   }
 
   public Limit(final String inDescription) {
-    String description = inDescription.toLowerCase();
-    level = description.charAt(0) - '0';
-    strength = 'e' - description.charAt(1);
-    String detail = description.substring(2);
+    String description = inDescription.isEmpty() ? "xx-had" : inDescription.toLowerCase();
+    level = description.charAt(0) == 'x' ? 5 : description.charAt(0) - '0';
+    strength = description.length() > 1 ? description.charAt(1) == 'x' ? 0 : 'e' - description.charAt(1) : 0;
+    String detail = description.length() > 2 ? description.substring(2) : "";
     initialize(level, strength, detail.indexOf('h') != -1, detail.indexOf('a') != -1, detail.indexOf('d') != -1);
   }
 
@@ -105,6 +105,10 @@ public class Limit implements Comparable<Limit> {
 
   public boolean isHP() {
     return h;
+  }
+
+  public boolean isValid() {
+    return a || d || h;
   }
 
   public boolean matches(final int inIVAttack, final int inIVDefense, final int inIVStamina) {

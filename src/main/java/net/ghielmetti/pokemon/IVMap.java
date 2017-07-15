@@ -8,14 +8,26 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class IVMap {
-  private static final Map<Limit, List<IVLevel>> map = new HashMap<>();
+  private static final String                    DEFENSE_CODE   = "d";
+  private static final String                    ATTACK_CODE    = "a";
+  private static final String                    HP_CODE        = "h";
+  private static final String                    STRENGTH_CODES = "xabcd";
+  private static final String                    LEVEL_CODES    = "x01234";
+  private static final Map<Limit, List<IVLevel>> map            = new HashMap<>();
+  private static final List<Limit>               allowedLimits  = new ArrayList<>();
 
   static {
-    for (char l = '1'; l <= '4'; l++) {
-      for (char s = 'a'; s <= 'd'; s++) {
-        for (char p = 1; p <= 7; p++) {
-          String limit = Character.toString(l) + s + "-" + ((p & 4) == 0 ? "" : "h") + ((p & 2) == 0 ? "" : "a") + ((p & 1) == 0 ? "" : "d");
-          map.put(new Limit(limit), new ArrayList<>());
+    for (int il = LEVEL_CODES.length() - 1; il >= 0; il--) {
+      for (int is = STRENGTH_CODES.length() - 1; is >= 0; is--) {
+        for (char p = 0; p <= 7; p++) {
+          char l = LEVEL_CODES.charAt(il);
+          char s = STRENGTH_CODES.charAt(is);
+          String limitName = Character.toString(l) + s + "-" + ((p & 4) == 0 ? "" : HP_CODE) + ((p & 2) == 0 ? "" : ATTACK_CODE) + ((p & 1) == 0 ? "" : DEFENSE_CODE);
+          Limit limit = new Limit(limitName);
+          if ((il >= 2) && (is >= 1)) {
+            allowedLimits.add(limit);
+          }
+          map.put(limit, new ArrayList<>());
         }
       }
     }
@@ -33,11 +45,15 @@ public class IVMap {
         }
       }
     }
+
     for (Entry<Limit, List<IVLevel>> e : new ArrayList<>(map.entrySet())) {
       if (e.getValue().isEmpty()) {
         map.remove(e.getKey());
+        allowedLimits.remove(e.getKey());
       }
     }
+
+    Collections.sort(allowedLimits);
   }
 
   private IVMap() {
@@ -45,12 +61,11 @@ public class IVMap {
   }
 
   public static List<IVLevel> getIVLevels(final Limit inLimit) {
-    return Collections.unmodifiableList(map.get(inLimit));
+    List<IVLevel> list = map.get(inLimit);
+    return list == null ? Collections.emptyList() : Collections.unmodifiableList(list);
   }
 
   public static List<Limit> getLimits() {
-    List<Limit> limits = new ArrayList<>(map.keySet());
-    Collections.sort(limits);
-    return limits;
+    return Collections.unmodifiableList(allowedLimits);
   }
 }
