@@ -65,18 +65,18 @@ public class Pokedex {
    * Returns the list of all possible ancestors of a Pokémon.<br>
    * An ancestor is a Pokémon that evolves in the the specified one.
    *
-   * @param inPokemon The Pokémon to get the ancestors.
+   * @param inName The Pokémon name to get the ancestors.
    * @return The list of the ancestors in the reverse evolutionary order.
    */
-  public List<Pokemon> getAncestors(final Pokemon inPokemon) {
+  public List<Pokemon> getAncestors(final String inName) {
     List<Pokemon> ancestors = new ArrayList<>();
-    String name = inPokemon.getName().toLowerCase();
+    String name = inName.toLowerCase();
 
     for (Entry<String, Set<String>> entry : evolutions.entrySet()) {
       if (entry.getValue().contains(name)) {
         Pokemon pokemon = getPokemon(entry.getKey());
         ancestors.add(pokemon);
-        ancestors.addAll(getAncestors(pokemon));
+        ancestors.addAll(getAncestors(pokemon.getName()));
       }
     }
 
@@ -87,18 +87,18 @@ public class Pokedex {
    * Returns the list of all possible offsprings of a Pokémon.<br>
    * An offspring is an evolution of the Pokémon.
    *
-   * @param inPokemon The Pokémon to get the offsprings.
+   * @param inName The Pokémon name to get the offsprings.
    * @return The list of the offsprings in evolutionary order.
    */
-  public List<Pokemon> getOffsprings(final Pokemon inPokemon) {
+  public List<Pokemon> getOffsprings(final String inName) {
     List<Pokemon> offsprings = new ArrayList<>();
-    Set<String> possibleEvolutions = evolutions.get(inPokemon.getName().toLowerCase());
+    Set<String> possibleEvolutions = evolutions.get(inName.toLowerCase());
 
     if (possibleEvolutions != null) {
       for (String name : possibleEvolutions) {
         Pokemon pokemon = getPokemon(name);
         offsprings.add(pokemon);
-        offsprings.addAll(getOffsprings(pokemon));
+        offsprings.addAll(getOffsprings(pokemon.getName()));
       }
     }
 

@@ -215,6 +215,15 @@ public final class CandidateList {
   }
 
   /**
+   * Returns <code>true</code> if the candidates list is empty.
+   * 
+   * @return <code>true</code> if empty.
+   */
+  public boolean isEmpty() {
+    return size() == 0;
+  }
+
+  /**
    * Accessor.
    *
    * @return <code>true</code> if the list also returns half levels.

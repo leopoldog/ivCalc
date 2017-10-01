@@ -1,9 +1,10 @@
 package net.ghielmetti.ivcalc.gui.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -13,6 +14,7 @@ import javax.swing.table.TableModel;
 
 import net.ghielmetti.ivcalc.data.GoodnessChecker;
 import net.ghielmetti.ivcalc.data.IVLevel;
+import net.ghielmetti.ivcalc.data.Pokemon;
 import net.ghielmetti.ivcalc.database.PokemonDatabase;
 import net.ghielmetti.ivcalc.pokedex.Pokedex;
 import net.ghielmetti.utilities.Translations;
@@ -48,9 +50,10 @@ public class GoodnessCheckerModel implements GoodnessCheckerModelIfc {
 
   @Override
   public void createChecker(final String inName) {
-    checkersNames.add(inName);
-    deletedCheckers.remove(inName);
-    checkers.put(inName, new GoodnessChecker(inName, checkers.get(GLOBAL_CHECKER.getName())));
+    String name = getBaseName(inName);
+    checkersNames.add(name);
+    deletedCheckers.remove(name);
+    checkers.put(name, new GoodnessChecker(name, checkers.get(GLOBAL_CHECKER.getName())));
     Collections.sort(checkersNames);
 
     for (TableModelListener listener : listeners) {
@@ -77,6 +80,14 @@ public class GoodnessCheckerModel implements GoodnessCheckerModelIfc {
 
     for (String name : checkersNames) {
       names.remove(name);
+
+      for (Pokemon ancestor : pokedex.getAncestors(name)) {
+        names.remove(ancestor.getName());
+      }
+
+      for (Pokemon offspring : pokedex.getOffsprings(name)) {
+        names.remove(offspring.getName());
+      }
     }
 
     return names;
@@ -114,15 +125,6 @@ public class GoodnessCheckerModel implements GoodnessCheckerModelIfc {
       default:
         return "";
     }
-  }
-
-  /**
-   * Returns a list of all the Pokémons that have an associated {@link GoodnessChecker}.
-   *
-   * @return A list of {@link String}.
-   */
-  public Collection<String> getPokemonsWithCheckers() {
-    return Collections.unmodifiableCollection(checkersNames);
   }
 
   @Override
@@ -164,7 +166,7 @@ public class GoodnessCheckerModel implements GoodnessCheckerModelIfc {
    */
   @Override
   public boolean isGood(final String inPokemonName, final IVLevel inIVLevel) {
-    GoodnessChecker gc = checkers.get(inPokemonName);
+    GoodnessChecker gc = checkers.get(getBaseName(inPokemonName));
 
     // No specific goodness checker, check using the global one.
     if (gc == null) {
@@ -212,17 +214,26 @@ public class GoodnessCheckerModel implements GoodnessCheckerModelIfc {
     }
   }
 
+  private String getBaseName(final String inName) {
+    List<Pokemon> ancestors = pokedex.getAncestors(inName);
+    return ancestors.isEmpty() ? inName : ancestors.get(ancestors.size() - 1).getName();
+  }
+
   private void initializeGoodnessChecker() {
+    Set<String> names = new HashSet<>();
+
     for (GoodnessChecker gc : PokemonDatabase.getInstance().listGoodnessCheckers()) {
-      checkers.put(gc.getName(), gc);
-      checkersNames.add(gc.getName());
+      String name = getBaseName(gc.getName());
+      checkers.put(name, gc);
+      names.add(name);
     }
 
     if (!checkersNames.contains(GLOBAL_CHECKER.getName())) {
       checkers.put(GLOBAL_CHECKER.getName(), GLOBAL_CHECKER);
-      checkersNames.add(GLOBAL_CHECKER.getName());
+      names.add(GLOBAL_CHECKER.getName());
     }
 
+    checkersNames.addAll(names);
     Collections.sort(checkersNames);
   }
 }

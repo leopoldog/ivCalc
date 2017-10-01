@@ -50,45 +50,45 @@ public class PokedexTest {
     pokedex.getAllPokemons().add(new Pokemon(1234, "Name", 1, 2, 3, Type.DARK));
   }
 
-  /** Tests {@link Pokedex#getAncestors(Pokemon)}. */
+  /** Tests {@link Pokedex#getAncestors(String)}. */
   @Test
   public void getAncestors_aPokemonWithManyGenerationsAncestors_returnsTheAncestors() {
-    List<Pokemon> ancestors = pokedex.getAncestors(pokedex.getPokemon("raichu"));
+    List<Pokemon> ancestors = pokedex.getAncestors("raichu");
     assertEquals(2, ancestors.size());
   }
 
-  /** Tests {@link Pokedex#getAncestors(Pokemon)}. */
+  /** Tests {@link Pokedex#getAncestors(String)}. */
   @Test
   public void getAncestors_aPokemonWithOneGenerationAncestors_returnsTheAncestors() {
-    List<Pokemon> ancestors = pokedex.getAncestors(pokedex.getPokemon("sandslash"));
+    List<Pokemon> ancestors = pokedex.getAncestors("sandslash");
     assertEquals(1, ancestors.size());
   }
 
-  /** Tests {@link Pokedex#getAncestors(Pokemon)}. */
+  /** Tests {@link Pokedex#getAncestors(String)}. */
   @Test
   public void getAncestors_aPokemonWithoutAncestors_returnsAnEmptyList() {
-    List<Pokemon> ancestors = pokedex.getAncestors(pokedex.getPokemon("ekans"));
+    List<Pokemon> ancestors = pokedex.getAncestors("ekans");
     assertTrue(ancestors.isEmpty());
   }
 
-  /** Tests {@link Pokedex#getOffsprings(Pokemon)}. */
+  /** Tests {@link Pokedex#getOffsprings(String)}. */
   @Test
   public void getOffsprings_aPokemonWithManyManyGenerationsOffsprings_returnsTheOffsprings() {
-    List<Pokemon> offsprings = pokedex.getOffsprings(pokedex.getPokemon("cleffa"));
+    List<Pokemon> offsprings = pokedex.getOffsprings("cleffa");
     assertEquals(2, offsprings.size());
   }
 
-  /** Tests {@link Pokedex#getOffsprings(Pokemon)}. */
+  /** Tests {@link Pokedex#getOffsprings(String)}. */
   @Test
   public void getOffsprings_aPokemonWithManyOneGenerationOffsprings_returnsTheOffsprings() {
-    List<Pokemon> offsprings = pokedex.getOffsprings(pokedex.getPokemon("eevee"));
+    List<Pokemon> offsprings = pokedex.getOffsprings("eevee");
     assertEquals(5, offsprings.size());
   }
 
-  /** Tests {@link Pokedex#getOffsprings(Pokemon)}. */
+  /** Tests {@link Pokedex#getOffsprings(String)}. */
   @Test
   public void getOffsprings_aPokemonWithoutOffsprings_returnsAnEmptyList() {
-    List<Pokemon> offsprings = pokedex.getOffsprings(pokedex.getPokemon("raticate"));
+    List<Pokemon> offsprings = pokedex.getOffsprings("raticate");
     assertTrue(offsprings.isEmpty());
   }
 

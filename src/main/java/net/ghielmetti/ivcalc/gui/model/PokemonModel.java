@@ -111,14 +111,14 @@ public class PokemonModel extends Observable implements PokemonModelIfc {
   public CandidateList getSavedCandidates(final Pokemon inPokemon, final String inName, final Limit inLimit) {
     CandidateList candidate = PokemonDatabase.getInstance().getSavedCandidates(inPokemon, inName, inLimit);
 
-    if (candidate != null) {
+    if (!candidate.isEmpty()) {
       return candidate;
     }
 
-    for (Pokemon pokemon : pokedex.getAncestors(inPokemon)) {
+    for (Pokemon pokemon : pokedex.getAncestors(inPokemon.getName())) {
       candidate = PokemonDatabase.getInstance().getSavedCandidates(pokemon, inName, inLimit);
 
-      if (candidate != null) {
+      if (!candidate.isEmpty()) {
         return candidate;
       }
     }
@@ -130,7 +130,7 @@ public class PokemonModel extends Observable implements PokemonModelIfc {
   public List<String> getSavedCandidatesNames(final Pokemon inPokemon, final Limit inLimit) {
     List<String> names = new ArrayList<>(PokemonDatabase.getInstance().listSavedCandidates(inPokemon, inLimit));
 
-    for (Pokemon pokemon : pokedex.getAncestors(inPokemon)) {
+    for (Pokemon pokemon : pokedex.getAncestors(inPokemon.getName())) {
       names.addAll(PokemonDatabase.getInstance().listSavedCandidates(pokemon, inLimit));
     }
 
@@ -210,7 +210,7 @@ public class PokemonModel extends Observable implements PokemonModelIfc {
   public void removeSavedCandidates(final Pokemon inPokemon, final String inName) {
     PokemonDatabase.getInstance().removeSavedCandidates(inPokemon, inName);
 
-    for (Pokemon pokemon : pokedex.getAncestors(inPokemon)) {
+    for (Pokemon pokemon : pokedex.getAncestors(inPokemon.getName())) {
       PokemonDatabase.getInstance().removeSavedCandidates(pokemon, inName);
     }
   }
