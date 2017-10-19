@@ -75,8 +75,8 @@ public class PokemonTest {
   @Test
   public void getIcon_aPokemonWithAValidId_returnsAnIcon() {
     assertNotNull(pokemon.getIcon());
-    assertEquals(80, pokemon.getIcon().getIconWidth());
-    assertEquals(80, pokemon.getIcon().getIconHeight());
+    assertEquals(96, pokemon.getIcon().getIconWidth());
+    assertEquals(96, pokemon.getIcon().getIconHeight());
   }
 
   /** Tests {@link Pokemon#getName()}. */

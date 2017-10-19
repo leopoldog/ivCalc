@@ -29,6 +29,7 @@ import net.ghielmetti.ivcalc.data.Pokemon;
  * @author Leopoldo Ghielmetti
  */
 public class Pokedex {
+  private static final int               CURRENT_GENERATION   = 3;
   private static final String            RESOURCE_NAMES       = "names";
   private static final String            RESOURCE_BASE_VALUES = "/baseValues.csv";
   private static final String            RESOURCE_EVOLUTIONS  = "/evolutions.csv";
@@ -41,6 +42,15 @@ public class Pokedex {
   /** Constructor. */
   public Pokedex() {
     initialize();
+  }
+
+  /**
+   * Returns the generation considered in the application.
+   *
+   * @return The generation number.
+   */
+  public static int getCurrentGeneration() {
+    return CURRENT_GENERATION;
   }
 
   /**
@@ -155,18 +165,22 @@ public class Pokedex {
   }
 
   private void instantiatePokemon(final ResourceBundle inBundle, final Properties inTypes, final String[] inCharacteristics) {
-    int id = Integer.parseInt(inCharacteristics[0]);
-    String name = inCharacteristics[1];
-    int attack = Integer.parseInt(inCharacteristics[2]);
-    int defense = Integer.parseInt(inCharacteristics[3]);
-    int stamina = Integer.parseInt(inCharacteristics[4]);
+    int generation = Integer.parseInt(inCharacteristics[5]);
 
-    if (inBundle != null) {
-      name = inBundle.getString("n" + id);
+    if (generation <= CURRENT_GENERATION) {
+      int id = Integer.parseInt(inCharacteristics[0]);
+      String name = inCharacteristics[1];
+      int attack = Integer.parseInt(inCharacteristics[2]);
+      int defense = Integer.parseInt(inCharacteristics[3]);
+      int stamina = Integer.parseInt(inCharacteristics[4]);
+
+      if (inBundle != null) {
+        name = inBundle.getString("n" + id);
+      }
+
+      Pokemon pokemon = new Pokemon(id, name, attack, defense, stamina, getTypes(inTypes, id));
+      pokemons.put(name.toLowerCase(), pokemon);
     }
-
-    Pokemon pokemon = new Pokemon(id, name, attack, defense, stamina, getTypes(inTypes, id));
-    pokemons.put(name.toLowerCase(), pokemon);
   }
 
   private void readBaseValues(final Properties inTypes) {

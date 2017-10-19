@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.ghielmetti</groupId>
   <artifactId>ivcalc</artifactId>
-  <version>1.0-rc2</version>
+  <version>1.0</version>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -248,6 +248,16 @@
       <groupId>net.ghielmetti</groupId>
       <artifactId>utilities</artifactId>
       <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.3</version>
+    </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20170516</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

@@ -1,7 +1,12 @@
 package net.ghielmetti.ivcalc.pokedex;
 
 import java.awt.Color;
+import java.awt.Image;
+import java.net.URL;
 import java.util.ResourceBundle;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 /**
  * Pokémon types.
@@ -54,9 +59,18 @@ public enum Type {
 
   private static ResourceBundle bundle;
   private Color                 color;
+  private Icon                  icon;
 
   private Type(final Color inColor) {
     color = inColor;
+
+    URL iconURL = getClass().getResource("/types/" + name() + ".png");
+
+    if (iconURL == null) {
+      icon = null;
+    } else {
+      icon = new ImageIcon(new ImageIcon(iconURL).getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+    }
   }
 
   /**
@@ -74,6 +88,15 @@ public enum Type {
    */
   public Color getColor() {
     return color;
+  }
+
+  /**
+   * Returns the icon of this type.
+   *
+   * @return The icon.
+   */
+  public Icon getIcon() {
+    return icon;
   }
 
   /**

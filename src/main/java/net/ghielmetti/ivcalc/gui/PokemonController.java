@@ -16,6 +16,7 @@ import javax.swing.event.HyperlinkEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.ghielmetti.ivcalc.LatestRelease;
 import net.ghielmetti.ivcalc.gui.dialog.LanguageDialog;
 import net.ghielmetti.ivcalc.gui.dialog.OptionsDialog;
 import net.ghielmetti.ivcalc.gui.dialog.TeamDialog;
@@ -55,6 +56,17 @@ public class PokemonController implements Observer {
         view.setIconImage(LOGO.getImage());
         view.reset();
         view.setVisible(true);
+
+        new Thread(() -> {
+          try {
+            String latest = LatestRelease.getLatestVersion();
+            if (!latest.isEmpty() && !latest.equals("v" + model.getVersion())) {
+              view.setTitle(view.getTitle() + " " + Translations.translate("new.version.available"));
+            }
+          } catch (Exception e) {
+            // silently ignore
+          }
+        }, "Check for updates").start();
       }
     } catch (Exception e) {
       LOGGER.error("Error in execution", e);
@@ -143,14 +155,12 @@ public class PokemonController implements Observer {
       StringBuilder style = new StringBuilder("font-family:" + font.getFamily() + ";");
       style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
       style.append("font-size:" + font.getSize() + "pt;");
-      JEditorPane ep = new JEditorPane("text/html",
-          "<html><body style=\"" + style + "\">" + TITLE //
-              + "<br>Version: " + model.getVersion() //
-              + "<br>Copyright 2017 by LGS (Leopoldo Ghielmetti Software)" //
-              + "<br>Distributed under GPLv3!" //
-              + "<br>The sources are available on GitHub: <a href=\"https://github.com/leopoldog/ivCalc\">ivCalc</a> and <a href=\"https://github.com/leopoldog/utilities\">Utilities</a>." //
-              + "<br>The Pokémon images are taken from <a href=\"https://bulbapedia.bulbagarden.net/\">Bulbapedia</a>." //
-              + "</body></html>");
+      JEditorPane ep = new JEditorPane("text/html", "<html><body style=\"" + style + "\">" + TITLE //
+          + "<br>Version: " + model.getVersion() //
+          + "<br>Copyright 2017 by LGS (Leopoldo Ghielmetti Software)" //
+          + "<br>Distributed under GPLv3!" //
+          + "<br>The sources are available on GitHub: <a href=\"https://github.com/leopoldog/ivCalc\">ivCalc</a> and <a href=\"https://github.com/leopoldog/utilities\">Utilities</a>." //
+          + "</body></html>");
       ep.addHyperlinkListener(this::openURL);
       ep.setEditable(false);
       ep.setBackground(label.getBackground());

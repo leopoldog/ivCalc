@@ -60,7 +60,7 @@ public class CandidateListRenderer implements ListCellRenderer<CandidateList> {
     Pokemon pokemon = inCandidateList.getPokemon();
     Type[] types = pokemon.getTypes();
 
-    JLabel type1Label = new JLabel(types[0].getTypeName(), SwingConstants.CENTER);
+    JLabel type1Label = new JLabel(types[0].getTypeName(), types[0].getIcon(), SwingConstants.CENTER);
     type1Label.setBackground(types[0].getColor());
     type1Label.setOpaque(true);
     type1Label.setForeground(inList.getForeground());
@@ -69,7 +69,7 @@ public class CandidateListRenderer implements ListCellRenderer<CandidateList> {
     JLabel type2Label;
 
     if (types.length > 1) {
-      type2Label = new JLabel(types[1].getTypeName(), SwingConstants.CENTER);
+      type2Label = new JLabel(types[1].getTypeName(), types[1].getIcon(), SwingConstants.CENTER);
       type2Label.setBackground(types[1].getColor());
       type2Label.setOpaque(true);
     } else {
