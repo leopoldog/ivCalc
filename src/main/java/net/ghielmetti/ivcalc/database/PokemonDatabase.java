@@ -195,7 +195,7 @@ public class PokemonDatabase {
           createDbStructureV1();
         }
       } catch (SQLException e) {
-        LOGGER.error("Unable to open database", e);
+        LOGGER.error("Unable to open database file \"{}\"", name, e);
       }
     }
   }

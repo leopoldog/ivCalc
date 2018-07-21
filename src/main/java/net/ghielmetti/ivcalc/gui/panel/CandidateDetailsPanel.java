@@ -134,6 +134,7 @@ public class CandidateDetailsPanel extends JPanel implements Observer {
     JPanel panel = new JPanel(new GridLayout(1, 9));
     panel.setBackground(Color.LIGHT_GRAY);
     panel.add(new JLabel(Translations.translate("label.level"), SwingConstants.CENTER));
+    panel.add(new JLabel(Translations.translate("label.short"), SwingConstants.CENTER));
     panel.add(new JLabel(Translations.translate("label.code"), SwingConstants.CENTER));
     panel.add(new JLabel(Translations.translate("label.IVattack"), SwingConstants.CENTER));
     panel.add(new JLabel(Translations.translate("label.IVdefense"), SwingConstants.CENTER));

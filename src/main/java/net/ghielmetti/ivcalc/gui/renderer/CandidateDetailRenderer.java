@@ -75,6 +75,14 @@ public class CandidateDetailRenderer implements ListCellRenderer<CandidateDetail
       labelLevel.setFont(inList.getFont());
     }
 
+    char scode = (char) ('A' + 45 - ivLevel.getTotal());
+    if (scode > 'Z') {
+      scode = 'Z';
+    }
+
+    JLabel labelShort = new JLabel(Character.toString(scode), SwingConstants.CENTER);
+    labelShort.setForeground(inList.getForeground());
+    labelShort.setFont(inList.getFont());
     JLabel labelCode = new JLabel(ivLevel.toString(), SwingConstants.CENTER);
     labelCode.setForeground(inList.getForeground());
     labelCode.setFont(inList.getFont());
@@ -119,6 +127,7 @@ public class CandidateDetailRenderer implements ListCellRenderer<CandidateDetail
     panel.putClientProperty("candidate", ImmutablePair.of(level, ivLevel));
 
     panel.add(labelLevel);
+    panel.add(labelShort);
     panel.add(labelCode);
     panel.add(labelAttack);
     panel.add(labelDefense);
