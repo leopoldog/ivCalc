@@ -7,11 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Observable;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.ghielmetti.ivcalc.data.CandidateDetail;
 import net.ghielmetti.ivcalc.data.CandidateList;
 import net.ghielmetti.ivcalc.data.IVLevel;
@@ -22,6 +17,9 @@ import net.ghielmetti.ivcalc.pokedex.Pokedex;
 import net.ghielmetti.ivcalc.pokedex.Team;
 import net.ghielmetti.ivcalc.tools.PreferenceStore;
 import net.ghielmetti.utilities.VersionReader;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The model for the Pokémon application.
@@ -29,20 +27,20 @@ import net.ghielmetti.utilities.VersionReader;
  * @author Leopoldo Ghielmetti
  */
 public class PokemonModel extends Observable implements PokemonModelIfc {
-  private static final Logger     LOGGER         = LoggerFactory.getLogger(PokemonModel.class);
-  private static final Logger     OUTPUT         = LoggerFactory.getLogger("Output");
-  private final String            version        = new VersionReader().getVersion(ImmutablePair.of("net.ghielmetti", "ivcalc"));
-  private Pokedex                 pokedex;
-  private Team                    team;
-  private Limit                   limit;
-  private Integer                 cp             = Integer.valueOf(10);
-  private Integer                 hp             = Integer.valueOf(10);
-  private Integer                 sd             = Integer.valueOf(200);
-  private List<Pokemon>           pokemons       = new ArrayList<>();
-  private boolean                 showHalfLevels = true;
-  private CandidateList           selectedCandidate;
-  private List<CandidateList>     candidates     = new ArrayList<>();
-  private CandidateDetail         selectedDetail;
+  private static final Logger LOGGER         = LoggerFactory.getLogger(PokemonModel.class);
+  private static final Logger OUTPUT         = LoggerFactory.getLogger("Output");
+  private final String        version        = VersionReader.getVersion(ImmutablePair.of("net.ghielmetti", "ivcalc"));
+  private Pokedex             pokedex;
+  private Team                team;
+  private Limit               limit;
+  private Integer             cp             = 10;
+  private Integer             hp             = 10;
+  private Integer             sd             = 200;
+  private List<Pokemon>       pokemons       = new ArrayList<>();
+  private boolean             showHalfLevels = true;
+  private CandidateList       selectedCandidate;
+  private List<CandidateList> candidates     = new ArrayList<>();
+  private CandidateDetail     selectedDetail;
   // TODO try do do otherwise, I don't like this model in model way of life.
   private GoodnessCheckerModelIfc goodness;
 
@@ -225,10 +223,35 @@ public class PokemonModel extends Observable implements PokemonModelIfc {
 
   /** Compute the candidates based on the model configuration and notifies the observers. */
   public void searchCandidates() {
-    candidates = searchCandidates(pokemons, limit, cp.intValue(), hp.intValue(), sd.intValue());
+    candidates = searchCandidates(pokemons, limit, cp, hp, sd);
     LOGGER.debug("New candidates list");
     setChanged();
     notifyObservers(OBSERVE_CANDIDATE_LIST);
+  }
+
+  /**
+   * Compute the candidates using the given parameters.
+   *
+   * @param inPokemons The list of Pokémons to scan.
+   * @param inLimit The Limit.
+   * @param inCP The CP value.
+   * @param inHP The HP value.
+   * @param inSD The SD value.
+   * @return A list of matching candidates.
+   */
+  private List<CandidateList> searchCandidates(final List<Pokemon> inPokemons, final Limit inLimit, final int inCP, final int inHP, final int inSD) {
+    List<CandidateList> newList = new ArrayList<>();
+
+    for (Pokemon pokemon : inPokemons) {
+      CandidateList candidateList = pokemon.getIV(inLimit, inCP, inHP, inSD);
+
+      if (candidateList.size() > 0) {
+        newList.add(candidateList);
+        OUTPUT.info("{}", candidateList);
+      }
+    }
+
+    return newList;
   }
 
   @Override
@@ -254,7 +277,7 @@ public class PokemonModel extends Observable implements PokemonModelIfc {
 
   @Override
   public void setCP(final Integer inCP) {
-    Integer value = inCP == null || inCP.intValue() < 10 ? Integer.valueOf(10) : inCP;
+    Integer value = inCP == null || inCP.intValue() < 10 ? 10 : inCP;
     if (!value.equals(cp)) {
       cp = value;
       LOGGER.debug("New CP: {}", inCP);
@@ -265,7 +288,7 @@ public class PokemonModel extends Observable implements PokemonModelIfc {
 
   @Override
   public void setHP(final Integer inHP) {
-    Integer value = inHP == null || inHP.intValue() < 10 ? Integer.valueOf(10) : inHP;
+    Integer value = inHP == null || inHP.intValue() < 10 ? 10 : inHP;
     if (!value.equals(hp)) {
       hp = value;
       LOGGER.debug("New HP: {}", inHP);
@@ -291,7 +314,7 @@ public class PokemonModel extends Observable implements PokemonModelIfc {
 
   @Override
   public void setPokemons(final List<Pokemon> inPokemonList) {
-    if (!(pokemons.containsAll(inPokemonList) && inPokemonList.containsAll(pokemons))) {
+    if ((!pokemons.containsAll(inPokemonList) || !inPokemonList.containsAll(pokemons))) {
       pokemons = new ArrayList<>(inPokemonList);
       LOGGER.debug("New pokemon list: {}", pokemons);
       setChanged();
@@ -375,30 +398,5 @@ public class PokemonModel extends Observable implements PokemonModelIfc {
   @Override
   public void setViewExtendedState(final int inExtendedState) {
     PreferenceStore.setViewExtendedState(inExtendedState);
-  }
-
-  /**
-   * Compute the candidates using the given parameters.
-   *
-   * @param inPokemons The list of Pokémons to scan.
-   * @param inLimit The Limit.
-   * @param inCP The CP value.
-   * @param inHP The HP value.
-   * @param inSD The SD value.
-   * @return A list of matching candidates.
-   */
-  private List<CandidateList> searchCandidates(final List<Pokemon> inPokemons, final Limit inLimit, final int inCP, final int inHP, final int inSD) {
-    List<CandidateList> newList = new ArrayList<>();
-
-    for (Pokemon pokemon : inPokemons) {
-      CandidateList candidateList = pokemon.getIV(inLimit, inCP, inHP, inSD);
-
-      if (candidateList.size() > 0) {
-        newList.add(candidateList);
-        OUTPUT.info("{}", candidateList);
-      }
-    }
-
-    return newList;
   }
 }
